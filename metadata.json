@@ -1,0 +1,6 @@
+{
+  "name": "Calci",
+  "description": "Smart Unit Measurement Converter",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
