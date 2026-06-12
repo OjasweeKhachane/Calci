@@ -42,12 +42,24 @@ const ICON_MAP: Record<string, ComponentType<any>> = {
 };
 
 export default function App() {
-  // 1. Theme Management (Forced to Pure Light/White Theme to match Web Ventures style)
-  const theme = 'light';
+  // 1. Theme Management (System fallback + LocalStorage caching)
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('calci-theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return 'light';
+  });
+
   useEffect(() => {
-    document.documentElement.classList.remove('dark');
-    localStorage.setItem('calci-theme', 'light');
-  }, []);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('calci-theme', theme);
+  }, [theme]);
 
   // 2. Active Conversion State Catalog
   const [activeCategory, setActiveCategory] = useState<UnitCategory>('length');
@@ -197,7 +209,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans transition-colors duration-300 bg-[#f6fae1] text-slate-900 dark:bg-[#f6fae1] dark:text-slate-100 overflow-x-hidden relative selection:bg-slate-900/10 selection:text-slate-900">
+    <div className="min-h-screen flex flex-col font-sans transition-colors duration-300 bg-[#f6fae1] text-slate-900 dark:bg-slate-950 dark:text-slate-100 overflow-x-hidden relative selection:bg-slate-900/10 selection:text-slate-900">
       
       {/* Clean pure white background with zero decorative color circles */}
       <div className="absolute top-0 left-0 right-0 h-full overflow-hidden pointer-events-none z-0" />
@@ -215,12 +227,26 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Quick Conversion Quick link */}
+            {/* Quick Navigation Quick link */}
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="text-xs font-semibold px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition duration-150 cursor-pointer text-slate-600 dark:text-slate-300"
+            >
+              Home
+            </button>
             <button
               onClick={handleScrollToConverter}
               className="text-xs font-semibold px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition duration-150 cursor-pointer text-slate-600 dark:text-slate-300"
             >
               Converter
+            </button>
+            <button
+              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-50 transition-all duration-200 cursor-pointer"
+              title="Toggle theme mode"
+              aria-label="Toggle theme mode"
+            >
+              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
             </button>
           </div>
         </div>
@@ -245,7 +271,7 @@ export default function App() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl md:text-6xl font-sans tracking-tight font-black sm:leading-none text-slate-900"
+              className="text-4xl md:text-6xl font-sans tracking-tight font-black sm:leading-none text-slate-900 dark:text-white"
             >
               We Help to Simplify Your <span className="text-slate-950 dark:text-white font-extrabold">Unit Measurement Problems</span>
             </motion.h1>
